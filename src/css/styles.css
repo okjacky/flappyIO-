@@ -1,0 +1,14 @@
+#msg {
+    left: 20%;
+    position: fixed;
+    text-align: center;
+    top: 45%;
+    width: 60%;
+    z-index: 1;
+}
+canvas {
+    border : 1px solid red;
+    margin: 10px 10px;
+    flex: initial;
+
+}

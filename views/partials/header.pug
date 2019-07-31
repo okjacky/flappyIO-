@@ -1,0 +1,33 @@
+if msg
+    p(id='msg' class='alert alert-' + msg.class)=msg.text
+header
+ 
+    nav.navbar.navbar-expand-lg.navbar-dark.bg-dark
+        if datas.session.firstname
+            a.navbar-brand(href='/')
+                img.d-inline-block.align-top(src='/src/images/jt.png' width='30' height='30' alt='')
+                |   Atelier Back
+            #navbarNavAltMarkup.collapse.navbar-collapse
+                .navbar-nav
+                    a.nav-item.nav-link.active(href='#')
+                        |   Home 
+                        span.sr-only (current)
+                    a.nav-item.nav-link(href='#') jouer
+                    a.nav-item.nav-link(href='#') Pricing
+                    a.nav-item.nav-link(href='#') Profile
+            a.btn.btn-outline-primary(href='/disconnect') Déconnexion
+        else
+            a.navbar-brand(href='/')
+                img.d-inline-block.align-top(src='/src/images/jt.png' width='30' height='30' alt='')
+                |   Atelier Back
+            #navbarNavAltMarkup.collapse.navbar-collapse
+                .navbar-nav
+                    a.nav-item.nav-link.active(href='#')
+                        |   Home 
+                        span.sr-only (current)
+            a.btn.btn-outline-primary(href='/signin') SignIn
+            a.btn.btn-outline-primary(href='/register') Register
+
+    
+
+                

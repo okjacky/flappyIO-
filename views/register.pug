@@ -1,0 +1,24 @@
+include partials/head.pug
+.container
+    include partials/header.pug
+    h1= title
+    form(action="/register" method="post" class="col-12")
+        .form-row
+            .form-group.col-md-6
+                label(for='inputFirstname') Firstname
+                input#inputfirstname.form-control(type='text', name='firstname' placeholder='Firstname')
+            .form-group.col-md-6
+                label(for='inputLastname') Lastname
+                input#inputlastname.form-control(type='text', name='lastname' placeholder='Lastname')
+        .form-row
+            .form-group.col-md-6
+                label(for='inputEmail') Email
+                input#inputEmail.form-control(type='email', name='email' placeholder='Email')
+            .form-group.col-md-6
+                label(for='inputPassword') Password
+                input#inputPassword.form-control(type='password', name='pwd' placeholder='Password')
+        button.btn.btn-primary(type='submit') Sign in
+
+
+
+    include partials/footer.pug

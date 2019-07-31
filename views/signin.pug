@@ -1,0 +1,17 @@
+include partials/head.pug
+.container
+    include partials/header.pug
+    h1= title
+    form(action="/check" method="get" class="col-12")
+        .form-row
+            .form-group.col-md-6
+                label(for='inputEmail') Email
+                input#inputEmail.form-control(type='email', name ='email' placeholder='Email')
+            .form-group.col-md-6
+                label(for='inputPassword') Password
+                input#inputPassword.form-control(type='password', name ='pwd' placeholder='Password')
+        button.btn.btn-primary(type='submit') Sign In
+
+
+
+    include partials/footer.pug

@@ -1,0 +1,35 @@
+include partials/head.pug
+.container
+    include partials/header.pug
+    if session.firstname
+      h1= 'Bonjour ' + session.firstname
+    else
+      h1= title
+      
+
+    .container
+      #messageArea.row
+        .col-md-5
+          #cvs
+          canvas#canvas(width='320', height='516')
+        .col-md-7
+          .row
+            .col-md-6
+              .card.card-body.bg-light
+                h3 Online Players
+                ul#users.list-group
+            .col-md-6
+              #chat.chat
+              form#messageForm
+                .form-group
+                  label Enter Message
+                  textarea#message.form-control
+                  br
+                  input.btn.btn-primary(type='submit', value='Send message')
+
+      
+      
+
+    
+    
+    include partials/footer.pug
