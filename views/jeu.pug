@@ -8,7 +8,16 @@ include partials/head.pug
       
 
     .container
-      #messageArea.row
+      #userFormArea.row
+        .col-md-12
+          form#userForm
+            .form-group
+              label Veuillez Saisir un Pseudo pour jouer !
+              input#username.form-control
+              br
+              input.btn.btn-primary(type='submit', value='Envoyer')
+
+      #messageArea.d-none.row
         .col-md-5
           #cvs
           canvas#canvas(width='320', height='516')

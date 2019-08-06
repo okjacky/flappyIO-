@@ -7,12 +7,21 @@ $(function(){
     var $chat = $('#chat');
     var $messageArea = $('#messageArea');
     var $users = $('#users');
-    /*
     var $userFormArea = $('#userFormArea');
     var $userForm = $('#userForm');
-    
     var $username = $('#username');
-    */
+    
+    $userForm.submit(function(e){
+        e.preventDefault();
+        socket.emit('new user', $username.val(),function(data){
+            console.log('username', data);
+            if(data){
+                $userFormArea.addClass('d-none');
+                $messageArea.removeClass('d-none').addClass('d-flex');
+            }
+        });
+        $username.val('');
+    });
 
     $messageForm.submit(function(e){
         e.preventDefault();

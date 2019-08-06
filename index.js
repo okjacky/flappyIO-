@@ -53,7 +53,7 @@ app.use(function (req, res, next) {
 });
 
 app.get('/',redirectJeu, (req, res, next) => {
-   console.log('route //', req.session);
+   //console.log('route //', req.session);
     datas.title = 'Page d\'accueil';
     datas.session = req.session;
     //datas.session.token = req.session.token
@@ -71,7 +71,7 @@ app.get('/signin', redirectJeu,(req, res, next) => {
 app.get('/jeu',redirectLogin, (req,res,next)=>{
     datas.title = 'Bienvenue à mon jeu FlappyMultiJeueurs !';
     datas.session = req.session;
-     
+    console.log('pas de session!',datas.session ) 
     res.render('jeu', { datas });
 });
 
@@ -92,6 +92,7 @@ app.get('/check', redirectJeu, (req, res, next) => {
                         // console.log(docs[0].firstname)
                         req.session.firstname = docs[0].firstname;
                         req.session.ide = docs[0]._id;
+
                         app.locals.msg = { text: 'Vous êtes connecté !', class: 'success', firstname: docs[0].firstname }
                         res.redirect('/jeu');
                     } else {
@@ -162,7 +163,7 @@ ioServer.on('connection', function(socket){
     connections.push(socket);
    
     console.log('connected: %s sockets connected', connections.length);
-    console.log("data session",users);
+    
 
     //Disconnected
     socket.on('disconnect', function(){
@@ -178,12 +179,12 @@ ioServer.on('connection', function(socket){
 
 /************************Chat Handle************************/   
     //New User
-    if(socket.handshake.session.firstname){
-        console.log('handshake' );
-        socket.username = socket.handshake.session.firstname;
+    socket.on('new user', function(data, callback){
+        callback(true);
+        socket.username = data;
         users.push(socket.username);
         updateUsernames();
-    }
+    });
     
     //Send Message
     socket.on('send message', function(data){
@@ -193,6 +194,7 @@ ioServer.on('connection', function(socket){
 
     function updateUsernames(){
         ioServer.emit('get users', users);
+        console.log("data users",users);
     }
 
 
