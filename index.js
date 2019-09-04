@@ -31,14 +31,14 @@ app.use(session({
 
 }));
 const redirectLogin = (req,res,next)=>{
-    if(!datas.session.firstname){
+    if(!req.session.firstname){
         res.redirect('/signin');
     }else{
         next();
     }
 }
 const redirectJeu = (req,res,next)=>{
-    if(datas.session.firstname){
+    if(req.session.firstname){
         res.redirect('/jeu');
     }else{
         next();
