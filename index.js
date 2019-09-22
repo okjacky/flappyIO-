@@ -8,7 +8,7 @@ const express = require('express');
 const app = express();
 const MongoClient = require('mongodb').MongoClient;
 const MongoStore = require('connect-mongo')(session);
-const url = process.env.DB_CONN;
+const url = "mongodb+srv://dbjack:Pwd4mydbjack@dbmcloud-93kzh.mongodb.net/dbBack?retryWrites=true&w=majority";
 const dbName = 'dbBack';
 const ObjectId = require('mongodb').ObjectId;
 
@@ -26,7 +26,7 @@ app.use(session({
     secret: 's3cr3t',
     saveUninitialized: true,  // don't create session until something stored
     store: new MongoStore({
-        url: process.env.DB_CONN
+        url: "mongodb+srv://dbjack:Pwd4mydbjack@dbmcloud-93kzh.mongodb.net/dbBack?retryWrites=true&w=majority"
     })
 
 }));
@@ -76,7 +76,7 @@ app.get('/jeu',redirectLogin, (req,res,next)=>{
 });
 
 app.get('/check', redirectJeu, (req, res, next) => {
-    MongoClient.connect(process.env.DB_CONN, { useNewUrlParser: true }, function (err, client) {
+    MongoClient.connect(url, { useNewUrlParser: true }, function (err, client) {
         const db = client.db(dbName);
         const collection = db.collection('users');
         if (req.query.email && req.query.pwd) {
