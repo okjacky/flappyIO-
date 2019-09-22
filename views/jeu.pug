@@ -18,10 +18,17 @@ include partials/head.pug
               input.btn.btn-primary(type='submit', value='Envoyer')
 
       #messageArea.d-none.row
-        .col-md-5
+        #jeu.col-md-6
+          #winner(style='color:blue')
+          br
+          #count_down(style='color:red')
+          h3  Venez jouer avec moi en  
+          h3  cliquant sur la souris !  
+          br
+          button#newGame Start new game
           #cvs
-          canvas#canvas(width='320', height='516')
-        .col-md-7
+          
+        .col-md-6
           .row
             .col-md-6
               .card.card-body.bg-light

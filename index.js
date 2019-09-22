@@ -71,7 +71,7 @@ app.get('/signin', redirectJeu,(req, res, next) => {
 app.get('/jeu',redirectLogin, (req,res,next)=>{
     datas.title = 'Bienvenue à mon jeu FlappyMultiJeueurs !';
     datas.session = req.session;
-    console.log('pas de session!',datas.session ) 
+    //console.log('pas de session!',datas.session ) 
     res.render('jeu', { datas });
 });
 
@@ -136,7 +136,7 @@ app.get('/disconnect', (req, res, next) => {
 });
 
 
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8181;
 let HttpServer = app.listen(port, () => {
     console.log('Connected on ', port)
 });
@@ -145,179 +145,144 @@ let allFlappys = {};
 let users = [];
 let connections = [];
 
+const COUNT_DOWN = 4;
+let count = COUNT_DOWN;
+// registered players
+let interval;
+let onlinePlayers = {};
+let playingPlayers = {};
+let gameStarted = false;
+
 /* **************WebSocket.IO************** */
 const SocketIo = require('socket.io');
 let ioServer = new SocketIo(HttpServer);
-ioServer.use(sharedsession(session({
-    resave: true,
-    secret: 's3cr3t',
-    saveUninitialized: true,  // don't create session until something stored
-    store: new MongoStore({
-        url: 'mongodb+srv://dbjack:Pwd4mydbjack@dbmcloud-93kzh.mongodb.net/dbBack?retryWrites=true&w=majority'
-    })
+// ioServer.use(sharedsession(session({
+//     resave: true,
+//     secret: 's3cr3t',
+//     saveUninitialized: true,  // don't create session until something stored
+//     store: new MongoStore({
+//         url: 'mongodb+srv://dbjack:Pwd4mydbjack@dbmcloud-93kzh.mongodb.net/dbBack?retryWrites=true&w=majority'
+//     })
 
-})));
+// })));
 
 
 ioServer.on('connection', function(socket){
-    connections.push(socket);
-   
-    console.log('connected: %s sockets connected', connections.length);
-    
-
-    //Disconnected
-    socket.on('disconnect', function(){
-        //if(!socket.username) return;
-        users.splice(users.indexOf(socket.username, 1));
-        updateUsernames();
-        connections.splice(connections.indexOf(socket), 1);
-
-        ioServer.emit('delete', myData);
-        delete allFlappys[myData.id];
-        console.log('Disconnected: %s sockets connected', connections.length);
+    socket.on('disconnect', () => {  
+        delete onlinePlayers[socket.id];
+        delete playingPlayers[socket.id];
+        //users.slice(users.indexOf(onlinePlayers[socket.id].username, 1));
     });
+
+  
 
 /************************Chat Handle************************/   
     //New User
     socket.on('new user', function(data, callback){
         callback(true);
-        socket.username = data;
-        users.push(socket.username);
-        updateUsernames();
+        onlinePlayers[socket.id] = {
+            name: data,
+            x: 300,
+            y: 300,
+            color: "#" + ((1 << 24) * Math.random() | 0).toString(16)
+          };
+
+        //users.push(onlinePlayers[socket.id].name);
+        updateUsernames(onlinePlayers);
+   
     });
-    
+
     //Send Message
     socket.on('send message', function(data){
         console.log(data);
-        ioServer.emit('new message', {msg: data, user: socket.username});
+        ioServer.emit('new message', {msg: data, user: onlinePlayers[socket.id].username});
     });
 
-    function updateUsernames(){
+    function updateUsernames(users){
         ioServer.emit('get users', users);
-        console.log("data users",users);
-    }
-
-
-/************************Game Handle************************/        
-    let myData = {
-        id: 'flappy-' + Math.round(Math.random() * 10000),
-        startBtn :{
-            x: 120,
-            y: 263,
-            w: 83,
-            h: 29
-        },
-        bg :{
-            sX: 292,
-            sY: 0,
-            w: 288,
-            h: 512,
-            x: 0,
-            y: 0
-        },
-        fg :{
-            sX: 584,
-            sY: 0,
-            w: 336,
-            h: 113,
-            x: 0,
-            y: 112,
-            dx: 2
-        },
-        bird: {
-            animation: [
-                {sX : 276, sY : 112},
-                {sX : 276, sY : 139},
-                {sX : 276, sY : 164},
-                {sX : 276, sY : 139},
-            ],
-            x : 50,
-            y : 150,
-            w : 34,
-            h : 26,
-
-            radius: 12,
-            opacity: '',
-
-            frame: 0,
-            gravity: 0.25,
-            jump: 3.6,
-            speed: 0,
-            rotation: 0,
-
-        },
-        pipes: {
-            top:{
-                sX: 553,
-                sY: 0
-            },
-            bottom: {
-                sX: 502,
-                sY: 0
-            },
-            w: 53,
-            h: 400,
-            gap: 105,
-            maxYPos: -150,
-            dx: 2
-        },
-        score:{
-            best: 0,
-            value: 0,
-            v1: '#FFF',
-            v2: '#000',
-            v3: 50,
-            v4: 225,
-            v5: 186,
-            v6: 228
-        },
-        getReady: {
-            sX: 0,
-            sY: 228,
-            w: 173,
-            h: 152,
-            x: 173,
-            y: 80,
-        },
-        gameOver: {
-            sX: 175,
-            sY: 228,
-            w: 225,
-            h: 202,
-            x: 225,
-            y: 90,
-        }
-        
-    }
-    console.log('myData.id:', myData.id);
-    allFlappys[myData.id] = myData;
-    
        
-    socket.emit('init',myData);
+    }
+
+/**************game handle*************/
     
-    socket.on('birdMove', function(data){
-        //console.log('birdMoveooo:',data);
-        data.id = myData.id;
-        data.animation = myData.bird.animation;
-        data.x = myData.bird.x;
-        data.w = myData.bird.w;
-        data.h = myData.bird.h;
-        data.radius = myData.bird.radius;
-        //data.opacity = 0.5;
-        data.frame = myData.bird.frame;
-        data.gravity = myData.bird.gravity;
-        data.jump = myData.bird.jump;
-        data.speed = myData.bird.speed;
-        data.rotation = myData.bird.rotation;
-        
-        ioServer.emit('update', data);
-        
+    socket.on('player_ready', () => {
+        if (!gameStarted) {
+        playingPlayers[socket.id] = onlinePlayers[socket.id];
+        playingPlayers[socket.id].name = onlinePlayers[socket.id].name;
+
+        if (Object.keys(playingPlayers).length === Object.keys(onlinePlayers).length 
+            && gameStarted === false) {
+            // all ready, start count down
+            interval = setInterval(countDownTimer, 1000);
+        }
+        }
     });
+
+    socket.on('position', (data) => {
+        let player = onlinePlayers[socket.id] || {};
+        player.x = data.x;
+        player.y = data.y;
+        //console.log('playingPlayers[socket.id].name',playingPlayers[socket.id]);
+      });
     
-    socket.on('disconnect', function(){
-        console.log('disconnected !')
-        
-    });
-   
+      socket.on('player_dead', () => {
+        const player = playingPlayers[socket.id] || {};
+        delete playingPlayers[socket.id];
+        if (Object.keys(playingPlayers).length === 0) {
+          // game finished, all dead
+          gameStarted = false;
+          transmitWinner(player);
+        }
+      });
+    
 });
 
+function startGame() {
+    gameStarted = true;
+    ioServer.emit('start');
+  }
+  
+  setInterval(() => {
+    // create new obstacle
+    let minHeight = 20;
+    let maxHeight = 200;
+    let height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+    let minGap = 50;
+    let maxGap = 200;
+    let gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+    
+
+    const obstacle = {
+      'height': height,
+      'gap': gap
+    };
+    if (gameStarted) {
+        ioServer.emit('obstacle', obstacle);
+    }
+  }, 2500);
+  
+  setInterval(() => {
+    if (gameStarted) {
+      // broadcast all players positions
+      ioServer.emit('state', Object.values(playingPlayers));
+      //console.log('playingPlayers:', playingPlayers);
+    }
+  }, 1000 / 60);
+  
+  function transmitWinner(winner) {
+    // broadcast the winner
+    ioServer.emit('finish', {
+      'name': winner.name,
+      'color': winner.color
+    });
+  }
+  
+  function countDownTimer() {
+    count = count - 1;
+    ioServer.emit('count_down', count);
+    if (count <= 0) {
+      clearInterval(interval);
+      count = COUNT_DOWN;
+      startGame();
+    }
+  }
